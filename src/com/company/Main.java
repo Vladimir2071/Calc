@@ -7,7 +7,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        String expr = "(55+8)*12-120/4+29*2";
+        String expr = "(55+8)*12-120/4+29*2.5";
         ArrayList<ElemExpr> list = new ArrayList<ElemExpr>();
 
         try {

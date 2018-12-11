@@ -83,7 +83,6 @@ public class UtilExpr {
     public static ArrayList<ElemExpr> getPolandListElements(ArrayList<ElemExpr> list) {
         ElemExpr elem;
         ArrayDeque<ElemExpr> stack = new ArrayDeque<ElemExpr>();
-
         ArrayList<ElemExpr> listPoland = new ArrayList<ElemExpr>();
 
         for (int i = 0; i < list.size(); i++) {
@@ -133,26 +132,38 @@ public class UtilExpr {
         ArrayList<ElemExpr> list = new  ArrayList<ElemExpr>();
         ArrayDeque<Character> stackBrackets = new ArrayDeque<Character>();
 
-        String readOperand = new String();
+        String readOperandNumber = new String();
         String readOperation = new String();
         char ch;
 
         for (int i = 0; i < expr.length(); i++) {
             ch = expr.charAt(i);
 
-            if (Character.isDigit(ch)) {
-                readOperand += ch;
+            if (ch == ' ') {
+                continue;
+            } else if (Character.isDigit(ch) || ch == '.') {
+                readOperandNumber += ch;
                 if (!readOperation.isEmpty()) {
                     list.add(addElemOfExpr(2, readOperation));
                     readOperation = "";
                 }
             } else if (isSymbolOperation(ch)) {
                 readOperation += ch;
-                if (!readOperand.isEmpty()) {
-                    list.add(addElemOfExpr(1, readOperand));
-                    readOperand = "";
+                if (!readOperandNumber.isEmpty()) {
+                    if (readOperandNumber.indexOf(".") == readOperandNumber.lastIndexOf(".")) {
+                        list.add(addElemOfExpr(1, readOperandNumber));
+                        readOperandNumber = "";
+                    } else {
+                        throw new Exception("There is error number(too much radix point)! Number: " + readOperandNumber);
+                    }
                 }
             } else if (ch == '(') {
+                if (!readOperation.isEmpty()) {
+                    list.add(addElemOfExpr(2, readOperation));
+                    readOperation = "";
+                } else if (!readOperandNumber.isEmpty()) {
+                    throw new Exception("There is open bracket is incorrect! Position: " + (i + 1));
+                }
                 list.add(addElemOfExpr(3, "("));
                 stackBrackets.addLast(ch);
             } else if (ch == ')') {
@@ -169,7 +180,7 @@ public class UtilExpr {
                     throw new Exception("There are odd close bracket in position " + (++i));
                 }
             } else {
-                // other symbol, may be . or E(exponential symbol) or something function
+                // other symbol, may be something function
                 // It'll be developed in the future
 
             }
@@ -181,8 +192,8 @@ public class UtilExpr {
         }
 
         // after end of cycle check buffers readOperand and readOperation
-        if (readOperand != "") {
-            list.add(addElemOfExpr(1, readOperand));
+        if (readOperandNumber != "") {
+            list.add(addElemOfExpr(1, readOperandNumber));
         } else if (readOperation != "") {
             list.add(addElemOfExpr(2, readOperation));
         }
